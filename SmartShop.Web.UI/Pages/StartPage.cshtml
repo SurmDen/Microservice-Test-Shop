@@ -1,0 +1,97 @@
+﻿@page "/startpage"
+@model StartPage
+
+<div class="container">
+    <div class="row">
+        <div class="two"><h1>Welcome to Smart Shop!</h1></div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div>
+                <h1 style="font-size:65px; color:#06313a; font-family:'Times New Roman', Times, serif;">Services:</h1>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-6 col-md-6 col-sm-12 margin">
+           
+            <a class="btn" style="background-color:#155a59;" href="/SmartShop/Login">
+                <div style="display:flex;flex-direction:row;justify-content:left;align-items:center;">
+                    <div class="m-2" style="font-size:70px;font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;">
+                        Identity Service
+                    </div>
+                    <img style="border: 2px solid #06313a; border-radius: 50%; background-color: #1b344c;
+                    width: 70px; height: 70px" src="/images/id2.png" />
+                </div>
+            </a>
+            <a class="btn" style="background-color:#155a59" href="/SmartShop/Products">
+                <div style="display:flex;flex-direction:row;justify-content:left;align-items:center;">
+                    <div class="m-2" style="font-size:70px;font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;">
+                        Product Service
+                    </div>
+                    <img style="border: 2px solid #06313a; border-radius: 50%; background-color: #1b344c;
+                    width: 70px; height: 70px" src="/images/product.png" />
+                </div>
+            </a>
+            <a class="btn" style="background-color:#155a59" href="/SmartShop/Busket">
+                <div style="display:flex;flex-direction:row;justify-content:left;align-items:center;">
+                    <div class="m-2" style="font-size:70px;font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;">
+                        Busket Service
+                    </div>
+                    <img style="border: 2px solid #06313a; border-radius: 50%; background-color: #1b344c;
+                    width: 70px; height: 70px" src="/images/busket.webp" />
+                </div>
+            </a>
+            <a class="btn" style="background-color:#155a59" href="/SmartShop/Orders">
+                <div style="display:flex;flex-direction:row;justify-content:left;align-items:center;">
+                    <div class="m-2" style="font-size:70px;font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;">
+                        Order Service
+                    </div>
+                    <img style="border: 2px solid #06313a; border-radius: 50%; background-color: #1b344c;
+                    width: 70px; height: 70px" src="/images/order.webp" />
+                </div>
+            </a>
+            <a class="btn" style="background-color:#155a59" href="/SmartShop/Users">
+                <div style="display:flex;flex-direction:row;justify-content:left;align-items:center;">
+                    <div class="m-2" style="font-size:70px;font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;">
+                        Account Service
+                    </div>
+                    <img style="border: 2px solid #06313a; border-radius: 50%; background-color: #1b344c;
+                    width: 70px; height: 70px" src="/images/users.png" />
+                </div>
+            </a>
+        </div>
+        <div class="col-lg-6 col-md-6 col-sm-12 margin">
+            <div class="divcontainer text-center" style="position:relative; background-color:aliceblue; border-radius:7px;">
+                <img style="border: 4px solid #155a59; border-radius: 50%; width: 150px; height: 150px" src="/images/surman.jpg" />
+                <p style="word-break:break-word;position:absolute; font-family:'Comic Sans MS';text-indent:20px; text-align:left;">
+                    Рад вас приветсвовать уважаемый гость! Меня зовут <b>Сурманидзе Денис</b>, хочу сделать вам небольшой обзрор на мой проект. Данное произведение искусства
+                    было создано исключительно в образовательных целях, я бы даже сказал в практических. Цель этого проекта - перейти от
+                    монолитной архитектуры к микросервисной. Да-да, это мое первое приложение на микросервисах(поэтому оно может вам пока
+                    заться столь нелепым). Тут я закрыл глаза на асинхронность, вопросы производительности, читабельность, front-end т.д.
+                    Я больше уделил внимания созданию системы аутентификации на основе JWT токена, так как именно он дает возможность использовать
+                    созданный токен всеми микросервисами. До этого активно использовал Identity Server, аутентификацию на основе Cookie.
+                    Так же я уделил внимание выстраиванию взаимодействия между сервисами, пытаясь добиться полной независимости друг от друга(
+                    как это и должно быть). Делал я это двумя способами, опять же с целью разнообразить и усложнить свою практикую.
+                    Первый спрособ - стандартный REST API, второй - на основе gRPC(на самом деле он мне почему-то больше нравится). Так же
+                    я уделил некоторое внимание созданию Gateway, а именно - Ocelot API Gateway. Не знаю используется ли он в индустрии,
+                    но для практики и общего понимания думаю сойдет. В дальнейшем планирую наращивать потенциал, мне еще есть чему поучиться,
+                    впрямь так и тянет взять образ в DockerHub и обернуть туда свой сервис. В общем спасибо за внимание, судите по всей строгости,
+                    но прошу указать на недостатки и если можно - способы их исправления. Удачи дорогой разработчик
+                </p>       
+            </div>
+        </div>
+    </div>
+    
+</div>
+
+@functions{
+    public class StartPage : PageModel
+    {
+        public IActionResult OnGet()
+        {
+            return Page();
+        }
+    }
+}
+

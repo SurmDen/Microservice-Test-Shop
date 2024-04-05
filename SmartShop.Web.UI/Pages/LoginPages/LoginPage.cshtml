@@ -1,0 +1,84 @@
+﻿@page "/loginpage"
+@model LoginPage
+
+
+<div class="container mt-3" >
+    <div class="row">
+        <div class="col-3"></div>
+        <div class="col-6">
+            <h4 class="text-white" 
+                style="border-radius:15px;background-color:#06313a;display:flex;align-items:center;justify-content:center;">
+                Please Log In
+            </h4>
+            <div asp-validation-summary="All">
+                <form asp-page="loginpage" method="post">
+                    <div class="form-group">
+                        <label>Your Name:</label>
+                        <input asp-for="Name" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label>Your Password:</label>
+                        <input asp-for="Password" class="form-control" type="password" />
+                    </div>
+                    <br />
+                    <div class="text-center">
+                        <button class="btn mb-" style="background-color: #06313a;color:aliceblue" asp-route="/SmartShop/Login" type="submit">Log In</button>
+                    </div>
+
+                </form>
+            </div>
+            <br />
+            <h4 class= "text-center">
+                You are unauthorized?
+            </h4>
+            <div class="text-center">
+                <a class="btn btn-info" href="/SmartShop/UserAccount/Create">Make It now!</a>
+            </div>
+        </div>
+        <div class="col-3"></div>
+    </div>
+</div>
+
+@functions{
+    public class LoginPage : PageModel
+    {
+        [BindProperty]
+        public string Name { get; set; }
+
+        [BindProperty]
+        public string Password { get; set; }
+
+        public IActionResult OnGet()
+        {
+            return Page();
+        }
+
+        public IActionResult OnPost()
+        {
+
+            if (!string.IsNullOrEmpty(Name) && !string.IsNullOrEmpty(Password))
+            {
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create($"http://localhost:5000/login?name={Name}&password={Password}");
+                HttpWebResponse response;
+                try
+                {
+                    response = (HttpWebResponse)request.GetResponse();
+                    return Redirect("/SmartShop/Start");
+                }
+                catch (Exception )
+                {
+
+                    ModelState.AddModelError("Uncorrect Data: ", "Invalid login or Password");
+                    return Page();
+                }
+
+
+            }
+            ModelState.AddModelError("Invalid parameter: ", Name);
+            ModelState.AddModelError("Invalid Parameter", Password);
+
+            return Page();
+        }
+
+    }
+}

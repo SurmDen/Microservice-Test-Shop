@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+option csharp_namespace = "SmartShop.AccountService";
+
+service AccountServiceProto{
+	rpc CreateUser (UserModel) returns (UserModelCreated);
+	rpc UpdateUser (UserModel) returns (UserModelUpdated);
+	rpc DeleteUser (UserModel) returns (UserModelDeleted);
+	rpc GetUser (UserModelId) returns (UserModel);
+	rpc GetUsers (UserModels) returns (stream UserModel);
+	rpc GetUsersId (UserModelsEmailAndName) returns (UserModelId);
+}
+
+message UserModel{
+
+	int32 id = 1;
+	string name = 2;
+	string password = 3;
+	string email = 4;
+	string address = 5;
+	string role = 6;
+	bool isMan = 7;
+}
+
+message UserModelCreated{
+
+}
+
+message UserModelUpdated{
+
+}
+
+message UserModelDeleted{
+
+}
+
+message UserModels{
+
+}
+
+message UserModelId{
+	int32 id = 1;
+}
+
+message UserModelsEmailAndName{
+	string email = 1;
+	string name = 2;
+}
+
+
+
+

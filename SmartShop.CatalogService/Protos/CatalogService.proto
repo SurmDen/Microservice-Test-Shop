@@ -1,0 +1,63 @@
+syntax = "proto3";
+option csharp_namespace = "SmartShop.CatalogService";
+
+service CatalogServiceProto{
+	rpc CreateProduct (ProductModel) returns (ProductModelCreated);
+	rpc UpdateProduct (ProductModel) returns (ProductModelUpdated);
+	rpc DeleteProduct (GetProductModel) returns (ProductModelDeleted);
+	rpc GetProduct (GetProductModel) returns (ProductModel);
+	rpc GetAllProducts(GetProductModels) returns (stream ProductModel);
+	rpc CreateCategory (CategoryModel) returns (CategoryModelCreated);
+	rpc DeleteCategory (CategoryModelId) returns (CategoryModelDeleted);
+	rpc GetAllCategories (GetCategoryModels) returns (stream CategoryModel);
+}
+
+message CategoryModel{
+	int32 id = 1;
+	string categoryName = 2;
+}
+
+message ProductModel{
+	int32 id = 1;
+	string productName = 2;
+	string description = 3;
+	int32  price = 4;
+	int32 categoryId = 5;
+	string categoryName = 6;
+}
+
+message ProductModelCreated{
+
+}
+
+message ProductModelUpdated{
+
+}
+
+message ProductModelDeleted{
+
+}
+
+message GetProductModels{
+
+}
+
+message GetProductModel{
+	int32 id = 1;
+}
+
+message CategoryModelCreated{
+
+}
+
+message CategoryModelDeleted{
+
+}
+
+message GetCategoryModels{
+
+}
+
+message CategoryModelId{
+	int32 id = 1;
+}

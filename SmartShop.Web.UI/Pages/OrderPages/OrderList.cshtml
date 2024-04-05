@@ -1,0 +1,90 @@
+﻿@page "/orderlist"
+@model OrderList
+
+<div class=" container mt-3">
+    <div class="row">
+        <div class="col-12" style="display:flex;flex-direction:row;justify-content:center;align-items:center;">
+            <div class="m-2" style="font-size:100px;font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;">
+                Orders
+            </div>
+            <img style="border: 2px solid #06313a; border-radius: 50%; background-color: #1b344c;
+                    width: 100px; height: 100px" src="/images/order.webp" />
+        </div>
+    </div>
+    <div class="row text-white" style="font-weight: 800; background-color: #06313a">
+        <div class="col-1 text-center">Id</div>
+        <div class="col-2 text-center">User Name</div>
+        <div class="col-2 text-center">Users Email</div>
+        <div class="col-2 text-center">Address</div>
+        <div class="col-2 text-center">Products</div>
+        <div class="col-1 text-center">
+            Total Price
+        </div>
+        <div class="col-2"></div>
+    </div>
+    @foreach (OrderModel order in Model.orders)
+    {
+        <div class="row mb-2" style="border-bottom:2px solid #06313a">
+            <div class="col-1 text-center" style="display: flex; justify-content: center; align-items: center;">@order.Id</div>
+            <div class="col-2 text-center" style="display: flex; justify-content: center; align-items: center;">@order.UserName</div>
+            <div class="col-2 text-center" style="display: flex; justify-content: center; align-items: center;">@order.UserEmail</div>
+            <div class="col-2 text-center" style="display: flex; justify-content: center; align-items: center;">@order.Address</div>
+            <div class="col-2 text-center" style="display: flex; justify-content: center; align-items: center;">@order.ProductName</div>
+            <div class="col-1" style="display: flex; justify-content: center; align-items: center;">
+                <div style="width:70px;height:35px;
+                        border-radius:15px;background-color:#ef977e;font-weight:700;
+                        color:aliceblue;display:flex;justify-content:center;align-items:center;">
+                    @order.Price
+                </div>
+            </div>
+            <div class="col-2 style="display: flex; justify-content: center; align-items: center;"">
+                <form asp-page="orderlist" method="post" class="m-2">
+                    <input type="hidden" asp-for="Id" value="@order.Id" />
+                    <button class="btn text-white" asp-route="/SmartShop/Orders" style="background-color:#ec6e6e" type="submit">
+                        @(order.Shipped == false ? "Ship Order" : "Shipped")
+                    </button>
+                </form>
+            </div>
+        </div>
+    }
+
+    <div class="row">
+        <div class="text-center col-12">
+            <a class="btn" href="/SmartShop/Products" style="color:aliceblue;background-color:#1b344c">Product List</a>
+        </div>
+    </div>
+
+</div>
+
+@functions{
+    public class OrderList: PageModel
+    {
+        public List<OrderModel> orders = new List<OrderModel>();
+        [BindProperty]
+        public long Id { get; set; }
+
+        public async Task OnGetAsync()
+        {
+            var channel = GrpcChannel.ForAddress("http://localhost:5501");
+            var client = new OrderServiceProto.OrderServiceProtoClient(channel);
+
+            using (var call = client.GetOrders(new GetOrderModels()))
+            {
+                while (await call.ResponseStream.MoveNext())
+                {
+                    orders.Add(call.ResponseStream.Current);
+                }
+            }
+        }
+
+        public async Task<IActionResult> OnPostAsync()
+        {
+            var channel = GrpcChannel.ForAddress("http://localhost:5501");
+            var client = new OrderServiceProto.OrderServiceProtoClient(channel);
+
+            await client.ShipOrderAsync(new OrderModelsId {Id = (int)Id });
+
+            return Redirect("/SmartShop/Orders");
+        }
+    }
+}

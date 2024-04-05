@@ -1,0 +1,194 @@
+﻿@page "/busketlist"
+@model BusketList
+
+<div class=" container mt-3" asp-validation-summary="All">
+    <div class="row">
+        <div class="col-12" style="display:flex;flex-direction:row;justify-content:center;align-items:center;">
+            <div class="m-2" style="font-size:100px;font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;">
+                Busket
+            </div>
+            <img style="border: 2px solid #06313a; border-radius: 50%; background-color: #1b344c;
+                    width: 100px; height: 100px" src="/images/busket.webp" />
+        </div>
+    </div>
+    <div class="row text-white" style="font-weight: 800; background-color: #06313a">
+
+        <div class="col text-center">Name</div>
+        <div class="col-3 text-center">Description</div>
+        <div class="col text-center">Price</div>
+        <div class="col text-center">Category</div>
+        <div class="col text-center">Quantity</div>
+        <div class="col"></div>
+    </div>
+    @if (Model.Lines.Count() != 0)
+    {
+        @foreach (BusketLineModel busket in Model.Lines)
+        {
+            <div class="row mb-2" style="border-bottom:2px solid #06313a">
+                <div class="col text-center" style="display:flex; align-items:center; justify-content:center">@busket.ProductName</div>
+                <div class="col-3 text-center" style="display:flex; align-items:center; justify-content:center">@busket.Description</div>
+                <div class="col text-center" style="display:flex; align-items:center; justify-content:center">@busket.Price</div>
+                <div class="col text-center" style="display:flex; align-items:center; justify-content:center">@busket.CategoryName</div>
+                <div class="col" style="display: flex; justify-content: center; align-items: center;">
+                    <div style="width:35px;height:35px;
+                        border-radius:50%;background-color:#ef977e;font-weight:700;
+                        color:aliceblue;display:flex;justify-content:center;align-items:center;">
+                        @busket.Quantity
+                    </div>
+                </div>
+                <div class="col" style="border:none;">
+                    <form asp-page="busketlist" method="post">
+                        <div class="form-group text-center">
+                            <input type="hidden" value="@busket.Id" name="Id"/>
+                            <button asp-route="/SmartShop/Busket"  type="submit" class="m-2">
+                                <img style="width:auto; height: 45px; background-color:aliceblue" src="/images/delete2.webp" />
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        }
+        <div class="row">
+            <div class="col-3"></div>
+            <div class="col-6 text-center">
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <form asp-page="busketlist" method="post">
+                        <div class="form-group text-center">
+                            <label class="mb-2 form-control" asp-for="Address" style="font-size:20px;border-radius:10px;
+                        background-color: #1b344c; color:aliceblue; font-weight:600">Add the post Address</label>
+                            <input class="form-control" asp-for="Address" />
+                        </div>
+                        <br />
+                        <div class="text-center">
+                            <button asp-route="/SmartShop/Busket" class="btn" type="submit" style="background-color: #ef977e; color: aliceblue ">
+                                Make Order
+                            </button>
+
+                        </div>
+                    </form>
+                }
+                else
+                {
+                    <a class="btn text-white" href="/SmartShop/Login" style="background-color:#ec6e6e">Authorize to make Order!</a>
+                }
+                <br />
+                <div class="text-center">
+                    <form asp-page="busketlist" method="post">
+                        <button asp-route="/SmartShop/Busket" class="btn" type="submit" style="background-color: #eadb8d; color: #060303 ">
+                            Remove All
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <div class="col-3"></div>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-12 text-center">
+                <h5 class="text-center">the busket is empty...</h5>
+            </div>
+        </div>
+    }
+</div>
+
+@functions{
+    public class BusketList: PageModel
+    {
+        public List<BusketLineModel> Lines { get; set; } = new List<BusketLineModel>();
+
+        public async Task OnGetAsync()
+        {
+            try
+            {
+                Lines = new List<BusketLineModel>();
+                var channel = GrpcChannel.ForAddress("http://localhost:5401");
+                var client = new BusketServiceProto.BusketServiceProtoClient(channel);
+
+                using (var call = client.GetBusketLines(new GetBusketLineModels()))
+                {
+                    while (await call.ResponseStream.MoveNext())
+                    {
+                        Lines.Add(call.ResponseStream.Current);
+                    }
+
+                }
+            }
+            catch (Exception)
+            {
+                Lines = new List<BusketLineModel>();
+            }
+        }
+
+        [BindProperty]
+        public string Address { get; set; }
+
+        [BindProperty]
+        public long Id { get; set; }
+
+        public async Task<IActionResult> OnPostAsync()
+        {
+
+            if (!string.IsNullOrEmpty(Address))
+            {
+                var channel2 = GrpcChannel.ForAddress("http://localhost:5401");
+                var client2 = new BusketServiceProto.BusketServiceProtoClient(channel2);
+
+
+
+                using (var call2 = client2.GetBusketLines(new GetBusketLineModels()))
+                {
+                    while (await call2.ResponseStream.MoveNext())
+                    {
+                        Lines.Add(call2.ResponseStream.Current);
+                    }
+
+                }
+
+
+                var channel = GrpcChannel.ForAddress("http://localhost:5501");
+                var client = new OrderServiceProto.OrderServiceProtoClient(channel);
+
+                if (Address != null)
+                {
+                    await client.MakeOrderAsync(new MakeOrderModel { Address = Address });
+                    return Redirect("/SmartShop/Orders");
+                }
+
+                ModelState.AddModelError("Order: ", "Please add products to busket to make order");
+                return Redirect("/SmartShop/Busket");
+            }
+            else if (Id != 0)
+            {
+                HttpWebRequest request = (HttpWebRequest)WebRequest
+               .Create($"http://localhost:5400/Busket/Delete/{Id}");
+                HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    return Redirect("/SmartShop/Busket");
+                }
+
+                ModelState.AddModelError("Busket: ", "Invalid operation");
+                return  Redirect("/SmartShop/Busket");
+            }
+            else
+            {
+                HttpWebRequest request2 = (HttpWebRequest)WebRequest
+               .Create($"http://localhost:5400/Busket/Delete/All");
+                HttpWebResponse response2 = (HttpWebResponse)request2.GetResponse();
+
+                if (response2.StatusCode == HttpStatusCode.OK)
+                {
+                    return Redirect("/SmartShop/Busket");
+                }
+
+                ModelState.AddModelError("Busket: ", "Invalid operation");
+                return  Redirect("/SmartShop/Busket");
+            }
+
+        }
+    }
+}

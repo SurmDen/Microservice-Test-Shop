@@ -1,0 +1,19 @@
+syntax = "proto3";
+option csharp_namespace = "SmartShop.BasketService";
+
+service BusketServiceProto{
+	rpc GetBusketLines (GetBusketLineModels) returns (stream BusketLineModel);
+}
+
+message BusketLineModel{
+	int32 id = 1;
+	string productName = 2;
+	string description = 3;
+	string categoryName = 4;
+	int32 price = 5;
+	int32 quantity = 6;
+}
+
+message GetBusketLineModels{
+
+}

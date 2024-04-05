@@ -1,0 +1,118 @@
+﻿@page "/updateproduct/{id}"
+@model UpdateProduct
+
+<div class="container mt-3">
+    <div class="row">
+        <div class="col-3"></div>
+        <div class="col-6" asp-validation-summary="All">
+            <h4 class="text-white text-center" style="border-radius: 15px; background-color: #06313a;">
+                Update @Model.ProductName
+            </h4>
+            <form asp-page="createproduct" method="post">
+                <input type="hidden" asp-for="Id"/>
+                <div class="form-group">
+                    <label>Product Name:</label>
+                    <input asp-for="ProductName" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>Description:</label>
+                    <input asp-for="Description" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>Price:</label>
+                    <input asp-for="Price" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>Choose category:</label>
+                    <select class="form-select" asp-for="CategoryId">
+                        <option value="0" selected>None</option>
+                        @foreach (CategoryModel m in Model.Categories)
+                        {
+                            <option value="@m.Id">@m.CategoryName</option>
+                        }
+                    </select>
+                </div>
+                <br />
+                <div class="text-center">
+                    <button class="btn btn-dark" asp-route="/SmartShop/Products/Update/{@Model.Id}" type="submit">Update</button>
+                    <a class="btn text-white" href="/SmartShop/Products" style="background-color:#ec6e6e">Go Back</a>
+                </div>
+            </form>
+        </div>
+        <div class="col-3"></div>
+    </div>
+</div>
+
+@functions{
+    public class UpdateProduct : PageModel
+    {
+        public List<CategoryModel> Categories { get; set; } = new List<CategoryModel>();
+
+        [BindProperty]
+        public long Id { get; set; }
+
+        [BindProperty]
+        public string ProductName { get; set; }
+
+        [BindProperty]
+        public string Description { get; set; }
+
+        [BindProperty]
+        public int Price { get; set; }
+
+        [BindProperty]
+        public long CategoryId { get; set; }
+
+
+        public async Task<IActionResult> OnGet(long id)
+        {
+            var channel = GrpcChannel.ForAddress("http://localhost:5301");
+            var client = new CatalogServiceProto.CatalogServiceProtoClient(channel);
+            @using (var call = client.GetAllCategories(new GetCategoryModels()))
+            {
+                while (await call.ResponseStream.MoveNext())
+                {
+                    Categories.Add(call.ResponseStream.Current);
+                }
+            }
+
+
+            ProductModel product = client.GetProduct(new GetProductModel { Id = (int)id});
+
+            Id = product.Id;
+            ProductName = product.ProductName;
+            Description = product.Description;
+            Price = product.Price;
+            CategoryId = product.CategoryId;
+            return Page();
+
+        }
+
+        public async Task<IActionResult> OnPostAsync()
+        {
+            var channel = GrpcChannel.ForAddress("http://localhost:5301");
+            var client = new CatalogServiceProto.CatalogServiceProtoClient(channel);
+
+            var client2 = new CatalogServiceProto.CatalogServiceProtoClient(channel);
+            @using (var call = client2.GetAllCategories(new GetCategoryModels()))
+            {
+                while (await call.ResponseStream.MoveNext())
+                {
+                    Categories.Add(call.ResponseStream.Current);
+                }
+            }
+
+            await client.UpdateProductAsync(new ProductModel
+            {
+                Id = (int)Id,
+                ProductName = ProductName,
+                Description = Description,
+                Price = (int)Price,
+                CategoryId = (int)CategoryId
+            });
+
+            return Redirect("/SmartShop/Products");
+        }
+    }
+}
+

@@ -1,0 +1,13 @@
+﻿{
+  "profiles": {
+    "SmartShop.CatalogService": {
+      "commandName": "Project",
+      "dotnetRunMessages": "true",
+      "launchBrowser": false,
+      "applicationUrl": "http://localhost:5300;http://localhost:5301",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

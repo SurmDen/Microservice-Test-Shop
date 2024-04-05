@@ -1,0 +1,124 @@
+﻿@page "/getuser"
+@model GetUser
+
+<div class="container">
+
+    @if (!User.Identity.IsAuthenticated)
+    {
+        <div class="row">
+            <div class="col-3"></div>
+            <div class="col-6 text-center">
+                <h3 class="bg-warning text-center text-white" style="border-radius:10px;">You are non-Authorized User!</h3>
+                <p>
+                    To start using our app please Authorize and we open for you all functionality
+                </p>
+                <a class="btn btn-dark" href="/SmartShop/Login">Log In</a>
+            </div>
+        </div>
+    }
+    else
+    {
+
+        <div class="row">
+            <div class="col-lg-6 col-md-6 col-sm-10 p-2" style="display:flex; justify-content:left">
+                @if (Model.UserModel.IsMan == true)
+                {
+                    <img style="width:250px;height:auto;border:5px solid black;" src="/images/man.png" />
+                }
+                else
+                {
+                    <img style="width:250px;height:auto;border:5px solid black;" src="/images/woman.jpg" />
+                }
+
+                <div class="p-2">
+                    <h5>@Model.UserModel.Name</h5>
+                    <h6>Your Data: </h6>
+                    <ul style="list-style:none;">
+                        <li><i>Email: </i>@Model.UserModel.Email</li>
+                        <li><i>Address: </i>@Model.UserModel.Address</li>
+                        <li><i>Male: </i>@(Model.UserModel.IsMan == true ? "MAN" : "WOMAN")</li>
+                    </ul>
+                    <br /><br />
+
+                   
+                   <div style="display:flex; flex-direction:row; justify-content:center;align-items:center">
+
+                       <form asp-page="getuser" method="post">
+                           <input type="hidden" name="Id" value="@Model.Id" />
+                           <button class="btn " type="submit" asp-route="/SmartShop/CurrentUser" style="margin:2px;background-color:#d55656">Delete Acc</button>
+                       </form>
+
+                       <a class="btn text-white" style="background-color:#3a536a" href="/SmartShop/UserAccount/Update/@Model.UserModel.Id">Update profile</a>
+
+                   </div>
+                </div>
+
+            </div>
+        </div>
+
+    }
+
+
+</div>
+
+@functions{
+    public class GetUser : PageModel
+    {
+        public UserModel UserModel { get; set; }
+
+        public long Id { get; set; }
+
+        public async Task<IActionResult> OnGetAsync()
+        {
+            string answer = string.Empty;
+
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://localhost:5100/Account/CurrentUser");
+            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+
+            if (response.StatusCode == HttpStatusCode.OK)
+            {
+                using (Stream stream = response.GetResponseStream())
+                {
+                    using (StreamReader reader = new StreamReader(stream))
+                    {
+                        answer = reader.ReadToEnd();
+                    }
+                }
+            }
+
+            CurrentUser user = JsonConvert.DeserializeObject<CurrentUser>(answer) ?? null;
+
+            var channel = GrpcChannel.ForAddress("http://localhost:5101");
+            var client = new AccountServiceProto.AccountServiceProtoClient(channel);
+
+            if (User.Identity.IsAuthenticated)
+            {
+                UserModelId id = client.GetUsersId(new UserModelsEmailAndName() { Email = user.Email, Name = user.Name });
+
+                UserModel = await client.GetUserAsync(id);
+
+                TempData["id"] = UserModel.Id;
+
+                return Page();
+            }
+            else
+            {
+                return Page();
+            }
+        }
+
+        public async Task<IActionResult> OnPostAsync()
+        {
+            var channel = GrpcChannel.ForAddress("http://localhost:5101");
+            var client = new AccountServiceProto.AccountServiceProtoClient(channel);
+
+            UserModel = client.GetUser(new UserModelId {Id = (int)TempData["id"] });
+
+            await client.DeleteUserAsync(UserModel);
+
+            return Redirect("/SmartShop/Login");
+        }
+
+    }
+}
+

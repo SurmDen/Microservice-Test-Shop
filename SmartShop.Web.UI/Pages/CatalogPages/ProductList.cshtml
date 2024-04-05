@@ -1,0 +1,82 @@
+﻿@page "/productlist"
+@model ProductList
+
+
+<div class=" container" asp-validation-summary="All">
+    <div class="row">
+        <div class="col-12" style="display:flex;flex-direction:row;justify-content:center;align-items:center;">
+            <div class="m-2" style="font-size:100px;font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;">
+                Products
+            </div>
+            <img style="border: 2px solid #06313a; border-radius: 50%; background-color: #1b344c;
+                    width: 100px; height: 100px" src="/images/product.png" />
+        </div>
+    </div>
+    <div class="row text-white" style="font-weight: 800; background-color: #06313a">
+        <div class="col text-center">Name</div>
+        <div class="col-3 text-center">Description</div>
+        <div class="col text-center">Price</div>
+        <div class="col text-center">Category</div>
+        <div class="col-1"></div>
+        <div class="col-2"></div>
+    </div>
+
+    @foreach (ProductModel product in Model.Products)
+    {
+        <div class="row mb-2" style="border-bottom:2px solid #06313a">
+            <div class="col text-center" style="display: flex; justify-content: center; align-items: center;">@product.ProductName</div>
+            <div class="col-3 text-center" style="display: flex; justify-content: center; align-items: center;">@product.Description</div>
+            <div class="col text-center" style="display: flex; justify-content: center; align-items: center;">@product.Price</div>
+            <div class="col text-center" style="display: flex; justify-content: center; align-items: center;">@product.CategoryName</div>
+            <div class="col-1 style="display: flex; justify-content: center; align-items: center;"">
+                 <a href="/Busket/Add/@product.Id/?redir=@Model.Redir" 
+                        style="border: none; background-color: #a2ceba; margin-bottom: 5px">
+                     <img style="border:2px solid #06313a;
+                        border-radius:50%;background-color: #7ad9f3;width:50px; height: 50px" src="/images/busket.webp" />
+                 </a>
+            </div>
+            <div class="col-2 style="display: flex; justify-content: center; align-items: center;"">
+                <a class="btn text-white mt-1" href="/SmartShop/Products/Update/@product.Id" style="background-color:#06313a">Update Product</a>
+            </div>
+        </div>
+    }
+    <div class="row">
+        <div style="display:flex;justify-content:center;">
+            <a class="btn btn-dark" href="/SmartShop/Products/Create">Create</a>
+        </div>
+    </div>
+</div>
+
+@functions{
+    public class ProductList : PageModel
+    {
+        public List<ProductModel> Products{ get; set; } = new List<ProductModel>();
+
+        public List<CategoryModel> Categories { get; set; } = new List<CategoryModel>();
+
+        public string Redir { get; set; } = "/SmartShop/Busket";
+
+        [BindProperty]
+        public long Id { get; set; }
+
+        public async Task<IActionResult> OnGetAsync()
+        {
+            var channel = GrpcChannel.ForAddress("http://localhost:5301");
+            var client = new CatalogServiceProto.CatalogServiceProtoClient(channel);
+
+            using (var call = client.GetAllProducts(new GetProductModels()))
+            {
+                while( await call.ResponseStream.MoveNext())
+                {
+                    Products.Add(call.ResponseStream.Current);
+                }
+
+            }
+
+            return Page();
+        }
+
+        
+
+    }
+}

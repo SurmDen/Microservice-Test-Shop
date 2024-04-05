@@ -1,0 +1,44 @@
+﻿//{
+//  "iisSettings": {
+//    "windowsAuthentication": false,
+//    "anonymousAuthentication": true,
+//    "iisExpress": {
+//      "applicationUrl": "http://localhost:5100",
+//      "sslPort": 0
+//    }
+//  },
+//  "profiles": {
+//    "IIS Express": {
+//      "commandName": "IISExpress",
+//      "launchBrowser": false,
+//      "applicationUrl": "http://localhost:5100",
+//      "environmentVariables": {
+//        "ASPNETCORE_ENVIRONMENT": "Development"
+//      }
+//    },
+//    "SmartShop.AccountService": {
+//      "applicationUrl": "http://localhost:5100",
+//      "commandName": "Project",
+//      "dotnetRunMessages": "true",
+//      "environmentVariables": {
+//        "ASPNETCORE_ENVIRONMENT": "Development"
+//      },
+//      "launchBrowser": false
+//    }
+
+//  }
+//}
+
+{
+  "profiles": {
+    "SmartShop.AccountService": {
+      "commandName": "Project",
+      "dotnetRunMessages": "true",
+      "launchBrowser": false,
+      "applicationUrl": "http://localhost:5100;http://localhost:5101",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
